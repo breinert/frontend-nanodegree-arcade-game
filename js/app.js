@@ -34,10 +34,10 @@ Enemy.prototype.render = function() {
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
-let Player = function(x, y, speed) {
-    this.x = x;
-    this.y = y;
-    this.speed = speed;
+var Player = function(x, y) {
+    this.x = 2;
+    this.y = 5;
+    //this.speed = speed;
     this.sprite = 'images/char-princess-girl.png';
     this.moving = false;
     this.win = false;
@@ -69,5 +69,36 @@ document.addEventListener('keyup', function(e) {
         40: 'down'
     };
 
-    player.handleInput(allowedKeys[e.keyCode]);
+    player.handleInput(allowedKeys[e.keyCode])
 });
+
+Player.prototype.handleInput = function(input){     
+    switch(input) {
+        case 'left':
+            this.x = this.x > 0 ? this.x - 1: this.x;
+            break;
+        case 'up':
+            this.y = this.y > 0 ? this.y - 1: this.y;
+            break;
+        case 'right':
+            this.x = this.x < 4 ? this.x + 1: this.x;
+            break;
+        case 'down':
+            this.y = this.y < 5 ? this.y + 1: this.y;
+            break;
+        default:
+            break;
+    }
+}
+
+
+
+Enemy.prototype.checkCollisions = function() {
+    if (this.y === Player.y) {
+        if (this.x >= Player.x - 0.25 && this.x <= Player.x + 0.25) {
+            return true;
+        }
+    } else {
+        return false;
+    }
+}
