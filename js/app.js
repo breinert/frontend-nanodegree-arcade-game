@@ -37,7 +37,7 @@ Enemy.prototype.render = function() {
 var Player = function() {
     this.x = 2;
     this.y = 5;
-    this.sprite = 'images/char-princess-girl.png';
+    this.sprite = 'images/char-boy.png';
     this.moving = false;
     this.win = false;
 };
@@ -59,7 +59,7 @@ Player.prototype.render = function() {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-const allEnemies = [...Array(3)].map((_,i)=>new Enemy(0, i+1));
+const allEnemies = [...Array(3)].map((_,i)=>new Enemy(i, i+1));
 const player = new Player();
 
 
@@ -76,7 +76,7 @@ document.addEventListener('keyup', function(e) {
     player.handleInput(allowedKeys[e.keyCode])
 });
 
-Player.prototype.handleInput = function(input){     
+Player.prototype.handleInput = function(input){
     switch(input) {
         case 'left':
             this.x = this.x > 0 ? this.x - 1: this.x;
@@ -96,22 +96,14 @@ Player.prototype.handleInput = function(input){
     this.moving = true;
 }
 
-Player.prototype.checkCollisions = function() {
-    if (this.y === Enemy.y) {
-        if (this.x >= Enemy.x - 0.5 && this.x <= Enemy.x + 0.5) {
-            return true;
-        }
-    } else {
-          return false;
-    }
-}
 
-Enemy.prototype.checkCollisions = function() {
-    if (this.y === Player.y) {
-        if (this.x >= Player.x - 0.5 && this.x <= Player.x + 0.5) {
-            return true;
+function checkCollisions() {
+    allEnemies.forEach(function(enemy) {
+        if (enemy.y === player.y) {
+            if (enemy.x >= player.x - 0.5 && enemy.x <= player.x + 0.5) {
+                player.y = 5;
+                player.x = 2;
+            }
         }
-    } else {
-          return false;
-    }
+    });
 }
