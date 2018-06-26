@@ -34,10 +34,9 @@ Enemy.prototype.render = function() {
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
-var Player = function(x, y) {
+var Player = function() {
     this.x = 2;
     this.y = 5;
-    //this.speed = speed;
     this.sprite = 'images/char-princess-girl.png';
     this.moving = false;
     this.win = false;
@@ -45,10 +44,15 @@ var Player = function(x, y) {
 Player.prototype.update = function() {
     this.isOutOfBoundsX = this.x > 5;
     this.isOutOfBoundsY = this.y < 1;
+    if (this.isOutOfBoundsY && !this.moving && !this.win) {
+        alert('Win');
+        this.win = true;
+    }
 }
 
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x * 101, this.y * 83);
+    this.moving = false;
 };
 
 
@@ -89,16 +93,25 @@ Player.prototype.handleInput = function(input){
         default:
             break;
     }
+    this.moving = true;
 }
 
-
-
-Enemy.prototype.checkCollisions = function() {
-    if (this.y === Player.y) {
-        if (this.x >= Player.x - 0.25 && this.x <= Player.x + 0.25) {
+Player.prototype.checkCollisions = function() {
+    if (this.y === Enemy.y) {
+        if (this.x >= Enemy.x - 0.5 && this.x <= Enemy.x + 0.5) {
             return true;
         }
     } else {
-        return false;
+          return false;
+    }
+}
+
+Enemy.prototype.checkCollisions = function() {
+    if (this.y === Player.y) {
+        if (this.x >= Player.x - 0.5 && this.x <= Player.x + 0.5) {
+            return true;
+        }
+    } else {
+          return false;
     }
 }
