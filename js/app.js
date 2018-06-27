@@ -7,6 +7,7 @@ var Enemy = function(x, y) {
     // a helper we've provided to easily load images
     this.x = x;
     this.y = y;
+    this.enemySpeed = ((Math.random() * 3) + 1);
     this.sprite = 'images/enemy-bug.png';
 };
 
@@ -21,9 +22,8 @@ Enemy.prototype.update = function(dt) {
     if (this.isOutOfBoundsX) {
         this.x = -1;
     } else {
-        this.x +=dt;
+        this.x += (dt * this.enemySpeed);
     }
-
 };
 
 // Draw the enemy on the screen, required method for game
@@ -41,6 +41,7 @@ var Player = function() {
     this.moving = false;
     this.win = false;
 };
+
 Player.prototype.update = function() {
     this.isOutOfBoundsX = this.x > 5;
     this.isOutOfBoundsY = this.y < 1;
@@ -61,7 +62,6 @@ Player.prototype.render = function() {
 // Place the player object in a variable called player
 const allEnemies = [...Array(3)].map((_,i)=>new Enemy(i, i+1));
 const player = new Player();
-
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
