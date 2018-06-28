@@ -1,22 +1,22 @@
+let score = 0;
+const currentScore = document.querySelector('.score');
+let lives = 3;
+const currentLives = document.querySelector('.lives');
+const currentTime = document.querySelector('.timer');
+let time;
+let elapsed;
+let start;
+let playing = false;
+let sec;
 // Enemies our player must avoid
 var Enemy = function(x, y) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
-
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
     this.x = x;
     this.y = y;
-    this.enemySpeed = ((Math.random() * 3) + 1);
+    this.enemySpeed = ((Math.random() * 3) + 0.5);
     this.sprite = 'images/enemy-bug.png';
 };
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
     this.isOutOfBoundsX = this.x > 5;
     this.isOutOfBoundsY = this.y < 1;
     if (this.isOutOfBoundsX) {
@@ -31,24 +31,41 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x * 101, this.y * 83);
 };
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
 var Player = function() {
     this.x = 2;
     this.y = 5;
     this.sprite = 'images/char-boy.png';
     this.moving = false;
     this.win = false;
+    playing = false;
 };
 
 Player.prototype.update = function() {
     this.isOutOfBoundsX = this.x > 5;
     this.isOutOfBoundsY = this.y < 1;
     if (this.isOutOfBoundsY && !this.moving && !this.win) {
-        alert('Win');
-        this.win = true;
+        score += 20;
+        this.x = 2;
+        this.y = 5;
+        playing = false;
+        clearTimer();
+        initialClick();
     }
+    if (sec === 0) {
+        this.x = 2;
+        this.y = 5;
+        playing = false;
+        clearTimer();
+        initialClick();
+        lives -= 1;
+        sec -= 15;
+        if (lives <= 0) {
+            alert('Game Over');
+        }
+    }
+    currentScore.innerHTML = score;
+    currentLives.innerHTML = lives;
+    currentTime.innerHTML = sec;
 }
 
 Player.prototype.render = function() {
@@ -57,14 +74,10 @@ Player.prototype.render = function() {
 };
 
 
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
 const allEnemies = [...Array(3)].map((_,i)=>new Enemy(i, i+1));
 const player = new Player();
 
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
+
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
         37: 'left',
@@ -72,9 +85,30 @@ document.addEventListener('keyup', function(e) {
         39: 'right',
         40: 'down'
     };
-
+    initialClick();
     player.handleInput(allowedKeys[e.keyCode])
+
 });
+
+function initialClick() {
+    if (playing == false) {
+        start = new Date().getTime();
+        setTimer();
+        playing = true;
+    }
+}
+
+function setTimer() {
+    timer = setInterval(function() {
+        time = ((new Date().getTime()) - start);
+        elapsed = Math.floor(time / 100) / 10;
+        sec = 15  - (parseInt(elapsed%60));
+    }, 100);
+}
+
+function clearTimer() {
+    clearInterval(timer);
+}
 
 Player.prototype.handleInput = function(input){
     switch(input) {
@@ -103,6 +137,13 @@ function checkCollisions() {
             if (enemy.x >= player.x - 0.5 && enemy.x <= player.x + 0.5) {
                 player.y = 5;
                 player.x = 2;
+                lives -= 1;
+                if (lives <= 0) {
+                    alert('Game Over');
+                }
+                playing = false;
+                clearTimer();
+                initialClick();
             }
         }
     });
