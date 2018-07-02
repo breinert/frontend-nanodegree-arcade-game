@@ -1,82 +1,104 @@
-let score = 0;
 const currentScore = document.querySelector('.score');
-let lives = 3;
+const endScore = document.querySelector('.modalScore');
+const myModal = document.getElementById('modal');
 const currentLives = document.querySelector('.lives');
 const currentTime = document.querySelector('.timer');
+let lives = 3;
+let score = 0;
 let time;
 let elapsed;
 let start;
 let playing = false;
-let sec;
+let sec = 15;
+let paused = false;
+
 // Enemies our player must avoid
-var Enemy = function(x, y) {
-    this.x = x;
-    this.y = y;
-    this.enemySpeed = ((Math.random() * 3) + 0.5);
-    this.sprite = 'images/enemy-bug.png';
-};
-
-Enemy.prototype.update = function(dt) {
-    this.isOutOfBoundsX = this.x > 5;
-    this.isOutOfBoundsY = this.y < 1;
-    if (this.isOutOfBoundsX) {
-        this.x = -1;
-    } else {
-        this.x += (dt * this.enemySpeed);
+class Enemy {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.enemySpeed = ((Math.random() * 3) + 0.5);
+        this.sprite = 'images/enemy-bug.png';
     }
-};
-
-// Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x * 101, this.y * 83);
-};
-
-var Player = function() {
-    this.x = 2;
-    this.y = 5;
-    this.sprite = 'images/char-boy.png';
-    this.moving = false;
-    this.win = false;
-    playing = false;
-};
-
-Player.prototype.update = function() {
-    this.isOutOfBoundsX = this.x > 5;
-    this.isOutOfBoundsY = this.y < 1;
-    if (this.isOutOfBoundsY && !this.moving && !this.win) {
-        score += 20;
-        this.x = 2;
-        this.y = 5;
-        playing = false;
-        clearTimer();
-        initialClick();
-    }
-    if (sec === 0) {
-        this.x = 2;
-        this.y = 5;
-        playing = false;
-        clearTimer();
-        initialClick();
-        lives -= 1;
-        sec -= 15;
-        if (lives <= 0) {
-            alert('Game Over');
+    update(dt) {
+        this.isOutOfBoundsX = this.x > 5;
+        this.isOutOfBoundsY = this.y < 1;
+        if (this.isOutOfBoundsX) {
+            this.x = -1;
+        }
+        else {
+            this.x += (dt * this.enemySpeed);
         }
     }
-    currentScore.innerHTML = score;
-    currentLives.innerHTML = lives;
-    currentTime.innerHTML = sec;
+    // Draw the enemy on the screen, required method for game
+    render() {
+        ctx.drawImage(Resources.get(this.sprite), this.x * 101, this.y * 83);
+    }
 }
 
-Player.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x * 101, this.y * 83);
-    this.moving = false;
-};
-
+class Player {
+    constructor() {
+        this.x = 2;
+        this.y = 5;
+        this.sprite = 'images/char-boy.png';
+        this.moving = false;
+        this.win = false;
+        playing = false;
+    }
+    update() {
+        this.isOutOfBoundsX = this.x > 5;
+        this.isOutOfBoundsY = this.y < 1;
+        if (this.isOutOfBoundsY && !this.moving && !this.win) {
+            score += 20;
+            this.x = 2;
+            this.y = 5;
+            playing = false;
+            clearTimer();
+            initialClick();
+        }
+        if (sec === 0) {
+            this.x = 2;
+            this.y = 5;
+            playing = false;
+            clearTimer();
+            initialClick();
+            lives -= 1;
+            sec = 15;
+            if (lives <= 0) {
+                openModal();
+            }
+        }
+        currentScore.innerHTML = score;
+        currentLives.innerHTML = lives;
+        currentTime.innerHTML = sec;
+    }
+    render() {
+        ctx.drawImage(Resources.get(this.sprite), this.x * 101, this.y * 83);
+        this.moving = false;
+    }
+    handleInput(input) {
+        switch (input) {
+            case 'left':
+                this.x = this.x > 0 ? this.x - 1 : this.x;
+                break;
+            case 'up':
+                this.y = this.y > 0 ? this.y - 1 : this.y;
+                break;
+            case 'right':
+                this.x = this.x < 4 ? this.x + 1 : this.x;
+                break;
+            case 'down':
+                this.y = this.y < 5 ? this.y + 1 : this.y;
+                break;
+            default:
+                break;
+        }
+        this.moving = true;
+    }
+}
 
 const allEnemies = [...Array(3)].map((_,i)=>new Enemy(i, i+1));
 const player = new Player();
-
 
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
@@ -110,26 +132,31 @@ function clearTimer() {
     clearInterval(timer);
 }
 
-Player.prototype.handleInput = function(input){
-    switch(input) {
-        case 'left':
-            this.x = this.x > 0 ? this.x - 1: this.x;
-            break;
-        case 'up':
-            this.y = this.y > 0 ? this.y - 1: this.y;
-            break;
-        case 'right':
-            this.x = this.x < 4 ? this.x + 1: this.x;
-            break;
-        case 'down':
-            this.y = this.y < 5 ? this.y + 1: this.y;
-            break;
-        default:
-            break;
-    }
-    this.moving = true;
+function openModal() {
+    paused = true;
+    myModal.style.display = 'block';
+    endScore.innerHTML = score;
+    document.getElementsByClassName('play-again')[0].addEventListener('click', reset);
+    document.getElementsByClassName('quit')[0].addEventListener('click', clearModal);
 }
 
+function reset() {
+    clearModal();
+    lives = 3;
+    score = 0;
+    sec = 15;
+    currentTime.innerHTML = sec;
+    allEnemies.forEach(function(enemy) {
+        enemy.enemySpeed = ((Math.random() * 3) + 0.5);
+    });
+    clearTimer();
+    setTimer();
+    paused = false;
+}
+
+function clearModal() {
+    myModal.style.display = 'none';
+}
 
 function checkCollisions() {
     allEnemies.forEach(function(enemy) {
@@ -139,7 +166,7 @@ function checkCollisions() {
                 player.x = 2;
                 lives -= 1;
                 if (lives <= 0) {
-                    alert('Game Over');
+                    openModal();
                 }
                 playing = false;
                 clearTimer();

@@ -78,8 +78,10 @@ var Engine = (function(global) {
      * on the entities themselves within your app.js file).
      */
     function update(dt) {
-        updateEntities(dt);
-        checkCollisions();
+        if(!paused) {
+            updateEntities(dt);
+            checkCollisions();
+        }
     }
 
 
@@ -162,9 +164,6 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        if (player.win === true && alert === false) {
-            main();
-        }
     }
 
     /* Go ahead and load all of the images we know we're going to need to
