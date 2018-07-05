@@ -3,13 +3,13 @@ const endScore = document.querySelector('.modalScore');
 const myModal = document.getElementById('modal');
 const currentLives = document.querySelector('.lives');
 const currentTime = document.querySelector('.timer');
-let lives = 3;
 let score = 0;
+let lives = 3;
+let sec = 15;
 let time;
 let elapsed;
 let start;
 let playing = false;
-let sec = 15;
 let paused = false;
 
 // Enemies our player must avoid
@@ -43,7 +43,6 @@ class Player {
         this.sprite = 'images/char-boy.png';
         this.moving = false;
         this.win = false;
-        playing = false;
     }
     update() {
         this.isOutOfBoundsX = this.x > 5;
@@ -107,13 +106,13 @@ document.addEventListener('keyup', function(e) {
         39: 'right',
         40: 'down'
     };
-    initialClick();
     player.handleInput(allowedKeys[e.keyCode])
-
 });
 
+document.addEventListener('keydown', initialClick);
+
 function initialClick() {
-    if (playing == false) {
+    if (playing === false) {
         start = new Date().getTime();
         setTimer();
         playing = true;
@@ -150,7 +149,7 @@ function reset() {
         enemy.enemySpeed = ((Math.random() * 3) + 0.5);
     });
     clearTimer();
-    setTimer();
+    playing = false;
     paused = false;
 }
 
