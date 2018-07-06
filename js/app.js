@@ -1,11 +1,15 @@
+'use strict';
+//Declare variables for DOM manipulation
 const currentScore = document.querySelector('.score');
 const endScore = document.querySelector('.modalScore');
 const myModal = document.getElementById('modal');
 const currentLives = document.querySelector('.lives');
 const currentTime = document.querySelector('.timer');
+//Declare variables for game play
 let score = 0;
 let lives = 3;
 let sec = 15;
+let timer;
 let time;
 let elapsed;
 let start;
@@ -20,6 +24,7 @@ class Enemy {
         this.enemySpeed = ((Math.random() * 3) + 0.5);
         this.sprite = 'images/enemy-bug.png';
     }
+    //When enemy reaches right side, reset to the left side
     update(dt) {
         this.isOutOfBoundsX = this.x > 5;
         this.isOutOfBoundsY = this.y < 1;
@@ -36,6 +41,7 @@ class Enemy {
     }
 }
 
+//Class for player
 class Player {
     constructor() {
         this.x = 2;
@@ -45,6 +51,7 @@ class Player {
         this.win = false;
     }
     update() {
+        //If player is at top, add to score and reset position and time
         this.isOutOfBoundsX = this.x > 5;
         this.isOutOfBoundsY = this.y < 1;
         if (this.isOutOfBoundsY && !this.moving && !this.win) {
@@ -55,6 +62,7 @@ class Player {
             clearTimer();
             initialClick();
         }
+        //If time runs out, take away a life and reset position and time
         if (sec === 0) {
             this.x = 2;
             this.y = 5;
@@ -67,6 +75,7 @@ class Player {
                 openModal();
             }
         }
+        //update scoreboard on page
         currentScore.innerHTML = score;
         currentLives.innerHTML = lives;
         currentTime.innerHTML = sec;
@@ -96,9 +105,11 @@ class Player {
     }
 }
 
+//instantiate enemies and player
 const allEnemies = [...Array(3)].map((_,i)=>new Enemy(i, i+1));
 const player = new Player();
 
+//Listener for movement
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
         37: 'left',
@@ -109,8 +120,10 @@ document.addEventListener('keyup', function(e) {
     player.handleInput(allowedKeys[e.keyCode])
 });
 
+//Listener for initial movement to start timer
 document.addEventListener('keydown', initialClick);
 
+//Function for initial movement to start timer
 function initialClick() {
     if (playing === false) {
         start = new Date().getTime();
@@ -119,6 +132,7 @@ function initialClick() {
     }
 }
 
+//Timer function
 function setTimer() {
     timer = setInterval(function() {
         time = ((new Date().getTime()) - start);
@@ -127,10 +141,12 @@ function setTimer() {
     }, 100);
 }
 
+//Function to stop the timer
 function clearTimer() {
     clearInterval(timer);
 }
 
+//End of game modal
 function openModal() {
     paused = true;
     myModal.style.display = 'block';
@@ -139,6 +155,7 @@ function openModal() {
     document.getElementsByClassName('quit')[0].addEventListener('click', clearModal);
 }
 
+//Function to reset game after modal display
 function reset() {
     clearModal();
     lives = 3;
@@ -153,10 +170,12 @@ function reset() {
     paused = false;
 }
 
+//Function to clear the modal from the screen
 function clearModal() {
     myModal.style.display = 'none';
 }
 
+//Function to check if the player and the enemies are colliding
 function checkCollisions() {
     allEnemies.forEach(function(enemy) {
         if (enemy.y === player.y) {
